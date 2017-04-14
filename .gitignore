@@ -3,3 +3,5 @@
 
 # whitelist
 !.gitignore
+!LICENSE
+!ec2reporter.go
