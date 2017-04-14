@@ -1,6 +1,10 @@
 # go-ec2reporter
 Shows Informations on AWS EC2 Instances with variable output formats.
 
+### install:
+    go get github.com/ypsman/go-ec2reporter
+    go install github.com/ypsman/go-ec2reporter
+
 ### usage:
     ./ec2reporter
 
