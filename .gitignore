@@ -5,5 +5,4 @@
 !.gitignore
 !LICENSE
 !README.md
-!ec2reporter.go
-!/src/*.go
+!*.go

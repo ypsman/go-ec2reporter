@@ -1,49 +1,24 @@
-package main
+package ec2reporter
 
 import (
-	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-// Ec2Instance : struct for EC2 Instances
-type Ec2Instance struct {
-	Name       string
-	InstID     string
-	ImageID    string
-	InstType   string
-	Launch     time.Time
-	State      string
-	PublicIP   string
-	PrivateIP  string
-	Monitoring string
-	Region     string
-}
-
-// InstancesList : array with struct from Instances
-type InstancesList []Ec2Instance
-
-// Ec2List : var from InstancesList
-var Ec2List InstancesList
-var ec2format string
-
-func checkError(err error) {
-	if err != nil {
-		fmt.Println("Error: ", err)
-		os.Exit(1)
-	}
-}
-
 func main() {
+	flagout := flag.String("out", "json", "table, json or block")
+	flag.Parse()
+	fmt.Println(*flagout)
 	fmt.Println("ec2reporter v.02")
 	result := connector()
 	resultWorker(result)
-	outformat := argcheck()
-	outputter(outformat)
+	//outformat := argcheck()
+
+	outputter(*flagout)
 }
 
 func argcheck() string {
@@ -56,6 +31,7 @@ func argcheck() string {
 }
 
 func outputter(ec2format string) {
+	fmt.Println(ec2format)
 	switch ec2format {
 	case "json":
 		outputjson()
@@ -66,37 +42,6 @@ func outputter(ec2format string) {
 	default:
 		outouttable()
 	}
-}
-
-func outouttable() {
-	tablespec := " %-17s %-19s %-8s %-15s %-15s \n"
-	fmt.Printf(tablespec, "Name", "InstanceID ", "Status ", "PrivateIP ", "PublicIP ")
-	for _, inst := range Ec2List {
-		fmt.Printf(tablespec, inst.Name, inst.InstID, inst.State, inst.PrivateIP, inst.PublicIP)
-	}
-}
-
-func outputrepot() {
-	for _, inst := range Ec2List {
-		fmt.Println(" ")
-		fmt.Println(" Instance Name: " + inst.Name)
-		fmt.Println("   instanceID: " + inst.InstID)
-		fmt.Println("   InstanceType: " + inst.InstType)
-		fmt.Println("   Instance Name: " + inst.Region)
-		fmt.Println("   AMI Image: " + inst.ImageID)
-		fmt.Println("   Launched at: " + inst.Launch.String())
-		fmt.Println("   Status: " + inst.State)
-		fmt.Println("   Private IP: " + inst.PrivateIP)
-		fmt.Println("   Public IP: " + inst.PublicIP)
-		fmt.Println("   Monitoring: " + inst.Monitoring)
-	}
-	fmt.Println(" ")
-}
-
-func outputjson() {
-	marshalled, err := json.Marshal(Ec2List)
-	checkError(err)
-	fmt.Println(string(marshalled))
 }
 
 // Connector : Connect to AWS
