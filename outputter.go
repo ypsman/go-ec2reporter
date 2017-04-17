@@ -1,4 +1,4 @@
-package ec2reporter
+package main
 
 import (
 	"encoding/json"

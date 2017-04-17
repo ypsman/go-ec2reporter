@@ -1,38 +1,28 @@
-package ec2reporter
+package main
 
 import (
 	"flag"
 	"fmt"
-	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
+// Flags for output, name, state
+var flagFormat = flag.String("out", "table", "table, json or block for Outputformat")
+var flagTNames = flag.String("name", "*", "Search for Tag")
+var flagStatus = flag.String("state", "*", "Search for state: running, pending, stop")
+
+//var flagInstID = flag.String("instid", "", "search for InstanceID")
+
 func main() {
-	flagout := flag.String("out", "json", "table, json or block")
 	flag.Parse()
-	fmt.Println(*flagout)
 	fmt.Println("ec2reporter v.02")
-	result := connector()
+	result := getInstances(*flagTNames, *flagStatus)
 	resultWorker(result)
-	//outformat := argcheck()
-
-	outputter(*flagout)
-}
-
-func argcheck() string {
-	if len(os.Args) == 2 {
-		outformat := os.Args[1:][0]
-		return outformat
-	}
-	outformat := "table"
-	return outformat
-}
-
-func outputter(ec2format string) {
-	fmt.Println(ec2format)
-	switch ec2format {
+	// switch for output
+	switch *flagFormat {
 	case "json":
 		outputjson()
 	case "block":
@@ -44,20 +34,35 @@ func outputter(ec2format string) {
 	}
 }
 
-// Connector : Connect to AWS
-func connector() *ec2.DescribeInstancesOutput {
-	// Load session from config
+// getInstances : connect to aws and get results
+func getInstances(iname, istatus string) *ec2.DescribeInstancesOutput {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 
 	// Create EC2 client
 	ec2sess := ec2.New(sess)
-	result, err := ec2sess.DescribeInstances(nil)
-	if err != nil {
-		fmt.Println("Error", err)
+	params := &ec2.DescribeInstancesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String("tag:Name"),
+				Values: []*string{
+					aws.String("*" + iname + "*"),
+				},
+			},
+			{
+				Name:   aws.String("instance-state-name"),
+				Values: []*string{aws.String("*" + istatus + "*")},
+			},
+		},
+		// not possible to search with Wildcard
+		//InstanceIds: []*string{
+		//	aws.String(""), // Required
+		//},
 	}
-	return (result)
+	result, err := ec2sess.DescribeInstances(params)
+	checkError(err)
+	return result
 }
 
 func resultWorker(result *ec2.DescribeInstancesOutput) {

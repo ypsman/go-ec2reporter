@@ -1,4 +1,4 @@
-package ec2reporter
+package main
 
 import (
 	"fmt"
@@ -25,7 +25,6 @@ type InstancesList []Ec2Instance
 
 // Ec2List : var from InstancesList
 var Ec2List InstancesList
-var ec2format string
 
 func checkError(err error) {
 	if err != nil {
