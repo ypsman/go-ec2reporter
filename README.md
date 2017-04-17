@@ -13,7 +13,7 @@ flags:
     -out        # output format (table, json, block)
     -state      # search instance with state (running, pending, stop)
 
-###Example outputs:
+### Example outputs:
 table:
 
      Name        InstanceID   Status   PrivateIP        PublicIP     
