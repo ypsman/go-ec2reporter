@@ -24,9 +24,6 @@
 * unsing go run for more Threads?
 * "Usage: " Function
 
-## cut to single package
-* No Ideas Yet
-
 ## output
 * table with variable width
 * output in HTML
